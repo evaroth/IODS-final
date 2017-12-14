@@ -1,9 +1,13 @@
 ---
 title: "IODS course final assignment"
-author: Eva Roth
+author: 
+- name: "Eva-Maria Roth"  
+  affiliation: "eva-maria.roth@helsinki.fi"
+email: "eva-maria.roth@helsinki.fi"
+date: 14.12.2017
 output:
   html_document:
-    theme: spacelab
+    theme: flatly
     toc: true
     toc_depth: 2
     fig_caption: true
