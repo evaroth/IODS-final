@@ -1,5 +1,6 @@
-In this assignment I am going to fit a multiple regression model on the dataset human and I will try to make predictions from it.
-Furthermore I will conduct linear discriminant analysis (LDA) with the data, train the LDA-model and try the model on a testing data set.
+####Abstract: 
+In this report I am going to fit a linear and multiple regression model on the dataset human. I will use the model to make predictions and check the models for their validity. 
+Furthermore I will conduct linear discriminant analysis (LDA) with the data, train the LDA-model and make predictions that I can verify or prove wrong with a test dataset. The report has the purpose to introduce the statistical methods and to explore the options that r provides to express data and the outcome of the data assessment graphically.
 
 #1. The dataset "human"
 The dataset originates from the [United Nationa Development Programme (UNDP)](http://hdr.undp.org/en/content/human-development-index-hdi). The UNDP aims to compare the development of countries and regions of the world, including not only growth alone, but many different variables. In this exercise we are using a subset, that I created from the original data. I selected certain variables concerning health and education as well as the Human Development Index (HDI) and the Gross National Income per capita (GNI). Missing values were removed from the dataset. The file of the data wrangling can be found [here](https://github.com/evaroth/IODS-final/blob/master/datawrangling.R). 
@@ -121,7 +122,8 @@ The leverage measures how much impact a single observation has on the model. In 
 There are no single outliers and leverage for all the observations is lower then 0.4.
 ```{r diagnostic2}
 par(mfrow = c(2,2))
-plot(my_model, which = c(1,2,5))
+plot(my_model, which = c(1,2,5), main = "Diagnostic plots for the simple regression
+")
 ```
 
 
@@ -129,13 +131,14 @@ The validation plots for the multiple regression model are very similar to the l
 ```{r validity}
 #exploring validity of the model by drawing diagnostic plots
 par(mfrow = c(2,2))
-plot(my_model2, which = c(1,2,5))
+plot(my_model2, which = c(1,2,5), main= "Fig.4: Diagnostic plots for the multiple regression
+     ")
 ```
 
 
 # 3. Performing Linear Discriminant analysis
 ## 3.1 Preparing the dataset
-Liner Discriminant Analysis is a variable reduction technique. The dependant variables is explaned by dimensions instead of variables. The dimensions combine the different variables.
+Liner Discriminant Analysis is a classification method that can be used to model binary or multiple class variables. The target variable has to be categorical. Furthermore it is a variable reduction technique. The dependant variables is explained by dimensions instead of variables. The dimensions combine the different variables.
 In order to conduct the linear discriminant analysis the dataset needs to be adjusted. I am dropping the HDI and GNI variables from the set as they are not interesting for our research question. Then I am scaling the standard set, using the function scale(), as the data contains only numerical values. The scaling needs to be done, because the linear discriminant analysis assumes that the variables are normally distributed and the variance of each variable is the same. In the scaling process the column means are substracted from the corresponding columns and divided by the standard deviatin. After scaling all the observations are between integral 10 and have a mean of 0.0. Now they can be related to each other and the disctances between the groups can be calculated. 
 ```{r scaling}
 #keep only the columns regarding health and education
@@ -146,7 +149,7 @@ summary(human_scaled)
 ```
 Furthermore I am replacing the variable Life.Exp with the categorical variable Lifeexp. The variable was created by splitting the numerical variable into four categories (low, med_low, med_high, high), at 25%, 50% and 75% of the values. Table no. 2 shows how the observations are distributed in the four categories.
 
-Tab. 2: Number of observations in the four categories of variable Lifeexp
+
 ```{r class}
 # class of the human_scaled object
 class(human_scaled)
@@ -154,7 +157,10 @@ class(human_scaled)
 human_scaled <- as.data.frame(human_scaled)
 bins <- quantile(human_scaled$Life.Exp)
 bins
-#create a categorical variable crime
+```
+Tab. 2: Number of observations in the four categories of variable Lifeexp
+```{r categorical}
+#create a categorical variable Lifeexp
 Lifeexp <- cut(human_scaled$Life.Exp, breaks = bins, include.lowest = TRUE, labels = c("low", "med_low", "med_high", "high"))
 table(Lifeexp)
 ```
@@ -165,7 +171,7 @@ human_scaled <- dplyr::select(human_scaled, -Life.Exp)
 human_scaled <- data.frame(human_scaled, Lifeexp)
 str(human_scaled)
 ```
-I will also try to make predictions with the LDA model. To prove the viability of the model, I can split my data into as train (80% of observations) and a test set (20% of observations). The model will be trained with the train set and verified with the test set as a control. Therefore, I am splitting the dataset.
+I will also try to make predictions with the LDA model. To prove the validity of the model, I can split my data into as train (80% of observations) and a test set (20% of observations). The model will be trained with the train set and verified with the test set as a control. Therefore, I am splitting the dataset.
 ```{r train test}
 n<- nrow(human_scaled)
 #choose randomly 80% of the rows
@@ -179,14 +185,24 @@ correct_classes <- test$Lifeexp
 #remove the Lifeexp variable from the test data
 test <- dplyr::select(test, -Lifeexp)
 ```
+Tab.3 & 4: Number of observations and variables for the train and the test set.
+```{r dim test train}
+# checking dimensions and observations of the two sets
+dim(train)
+dim(test)
+```
+The train set has 124 observations of 6 variables and the test set 31 observations of 5 varibales. The missing variables is the Lifeexp. I excluded it, as we are going to predict this variables for the test set.
 
 ##3.2 Fitting the LDA model
 
+Now we are fitting a linear discriminant analysis (LDA) to the training set. Lifeexp is the target variable and all the other variables are predictors. Furtehr down we can see the output of the LDA model. The prior probabilities give us the percentage of observations for each category. The group means show the mean value for every explanatory variable for each category. Further down we can see the coefficients for the produced linear discriminants. The proportion of variance shows how much of the variance between the groups is hold by the linear discriminants. LD1 holds 90% of the variance and LD2 0.09%.
 ```{r lda}
-lda.fit <- lda(Lifeexp ~ ., data  =train)
+lda.fit <- lda(Lifeexp ~ ., data  = train)
 #printing the lda.fit object
 lda.fit
 ```
+We can draw a LDA biplot to visualize how the data is distributed. The biplot shows the two dimensions LD1 and LD2. Each colour represents a different category of Lifeexp and the pink arrows represent the predictor variables. Length and direction are based on the coefficients and show their impact on the model.
+
 ```{r lda arrows}
 #lda biplot arrows
 lda.arrows <- function(x, myscale = 1, arrow_heads = 0.1, color = "deeppink2", tex = 1.25, choices = c(1,2)){
@@ -201,12 +217,16 @@ lda.arrows <- function(x, myscale = 1, arrow_heads = 0.1, color = "deeppink2", t
 classes <- as.numeric(train$Lifeexp)
 
 # plot the lda results
-plot(lda.fit, dimen = 2, col = classes, pch = classes)
+plot(lda.fit, dimen = 2, col = classes, pch = classes, main = "Fig. 6: Biplot for the LDA of the training set")
 lda.arrows(lda.fit, myscale = 2)
 ```
 
-## 3.3 Making prediction with the LDA model
-With our trained LDA-model I can make predictions about new observations for the variable Lifeexp. I predict the classes with the LDA model for the observations of the test set I created earlier. In the cross tabulation we can see how the results of our predictions match with the Lifeexp categories from the test set. 21 observations were correctly predicted and 10 were false. That means our training error is about 32,35%. The model can be used to make predictions, but they are not very accurate. It would be recommendable to leave some of the variables out, like for example percentage of female reprasentatives in parliament as the there is no strong correlation with the variable Lifeexp.
+From the arrows in the biplot we can conclude that the maternal mortality ratio has the strongest influence in separating the category low from the other categories. The categories high, med_high and med_low are quite closely clotted and mainly differing in the LD2, whereas the values of the category low are scattered widely allover both dimensions LD1 and LD2. The strongest factor separating the categories low, med_low and med_high es the Mean_Edu.
+
+## 3.3 Making predictions with the LDA model
+With our trained LDA-model I can make predictions about new observations for the variable Lifeexp. I am predicting the classes with the LDA model for the observations of the test set I created earlier. In the cross tabulation we can see how the results of our predictions match with the Lifeexp categories from the test set. 21 observations were correctly predicted and 10 were false. That means our training error is about 32,35%. The model can be used to make predictions, but they are not very accurate. It would be recommendable to leave some of the variables out, like for example percentage of female reprasentatives in parliament as the there is no strong correlation with the variable Lifeexp.
+
+Tab. 5: Predicted observations and actual observations for the variable lifeexpectancy of the test set crosstabulated
 ```{r predict with lda}
 # predict classes with test data
 lda.pred <- predict(lda.fit, newdata = test)
@@ -215,8 +235,16 @@ lda.pred <- predict(lda.fit, newdata = test)
 table(correct = correct_classes, predicted = lda.pred$class)
 ```
 
+#4 Conclusion
+From the statistical methods that I applied exemplarily, I can conclude that
+
+* Education has a significant positive correlation with health, especially life expectancy.
+* From the variables assessed, concerning education, mean years of education have the strongest influence on the life expectancy.
+* If I wanted to establish a model to make predictions about Life expectancy, I should include more variables to have a more precise output.
 
 
+#5 Sources
+All the information used can be found on the [MOOC](https://mooc.helsinki.fi/course/view.php?id=92) platform of the IODS-course.
 
 
 
