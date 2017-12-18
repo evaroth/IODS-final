@@ -28,9 +28,13 @@ human <- read.csv("/Users/eva-mariaroth/Documents/GitHub/IODS-final/human_.csv",
 #Exploring the data, its structur and dimensions
 str(human)
 ```
+```{r summary}
+summary(human)
+```
+
 I want to take a closer look at the variables and their relationships to each other. In order to do this I can pair the variables and see if there are correlations.The plot matrix shows us the distribution of the data for each variable. The variables are paired and the results are shown graphically in scatter plots and with the Correlation Coefficient. We can find the highest correlation between Life Expectancy and HDI with a correlation coefficient of 0.905.
 ```{r human pairs}
-p <- ggpairs(human, mapping = aes(col = "green4", alpha = 0.7), lower = list(combo = wrap("facethist", bins = 18)), title = "Fig. 1: Graphical overview of the dataset human")
+p <- ggpairs(human, mapping = aes(col = "green4", alpha = 0.9), lower = list(combo = wrap("facethist", bins = 18)), title = "Fig. 1: Graphical overview of the dataset human")
 p
 ```
 
@@ -56,10 +60,10 @@ In order to find out more about the impact of education on health we will perfor
 qplot(Life.Exp, Mean.Edu, data = human, main = "Fig.3: Linear regression for life expectancy and mean years of education", colour = "red") + geom_smooth(method = "lm")
 ```
 
-Now we want to write a simple regression model and see what kind of information it gives us. Life.Exp beeing the dependant variable y and Mean.Edu the explanatory variable x. Alpha indicates the point where the regression line intercepts the y-axis and beta to the slope of the regression line.Epsilon is an unobservable random variable, that is assumed to add noise to the observations and describes the errors of the model.
-
+Now we want to write a simple regression model and see what kind of information it gives us. The simple regression has the following formula:
 ![](/Users/eva-mariaroth/Desktop/Bildschirmfoto 2017-12-18 um 11.59.50.png)
 
+Life.Exp is the dependant variable y and Mean.Edu the explanatory variable x. Alpha indicates the point where the regression line intercepts the y-axis and beta to the slope of the regression line.Epsilon is an unobservable random variable, that is assumed to add noise to the observations and describes the errors of the model.
 The summary of the simple regression model at first shows us the formula applied, indicating the dependant variable and the explanatory variable. Then it gives us a summary of the residuals of the model. The residuals describe the prediction errors, i.e. the difference between the predicitions and the actual values. The estimate of the intercept describes the alpha parameter. In this case it would be 55.46. The estimate for the variable Mean.Edu gives us the beta parameter: 1,95. The P value of the model is very small, that means that the correlation between the variables is highly significant.
 
 ```{r simple regr}
@@ -68,7 +72,7 @@ my_model <- lm(Life.Exp ~ Mean.Edu, data = human)
 summary(my_model)
 ```
 
-###2.2 Making predictions using the model
+##2.2 Making predictions using the model
 Using the model, that I wrote, we can make predictions, about the life expectancy that we would find in countries, if the mean years of education would change. For this purpose I have added examplarily new values for the mean years of education for six countries. In table 1 we can see the predicted life expectancy that these countries would have, if the mean years of education would correspond to the newly entered values.
 
 ```{r predict}
@@ -96,8 +100,8 @@ Haiti       | 4.9       | 62.8        | 11.7        | 78.3
 Yemen       | 2.6       | 63.8        | 10.0        | 74.9
 
 
-# 2.3 Multiple regression model
-For taken more variables into account, we can write a multiple regression model with life expectany beeing the dependant variable and several explanatory variables x1, x2, x3 (Mean.Edu, Edu2.FM, Parli.F). 
+## 2.3 Multiple regression model
+For taken more variables into account, we can write a multiple regression model with life expectany beeing the dependant variable and several explanatory variables x1, x2, x3 (Mean.Edu, Edu2.FM, Parli.F). The formula would be:
 ![](/Users/eva-mariaroth/Desktop/Bildschirmfoto 2017-12-18 um 12.20.24.png)
 
 ```{r multipl regr}
@@ -107,7 +111,7 @@ summary(my_model2)
 ```
 In the summary of the model we can see, that on the mean years of education have a highly significant correlation with life expectancy. There is no significant correlation between female members in parliament and life expectance.
 
-# 2.4 Validity check for both models
+## 2.4 Validity check for both models
 Linear regression models assume that the errors are normally distributed, not correlated and have constant variance, i.e. the size of the error does not depend on the explanatory variables. By analysing the residuals of the model we can explore the validity of the model assumptions.
 
 Below we can see the three diagnostic plots "Residuals versus Fitted", "Normal QQ" and "Residuals vs Leverage" for the simple linear regression . 
@@ -129,7 +133,10 @@ plot(my_model2, which = c(1,2,5))
 ```
 
 
-# 4 Performing Linear Discriminant analysis
+# 3. Performing Linear Discriminant analysis
+## 3.1 Preparing the dataset
+Liner Discriminant Analysis is a variable reduction technique. The dependant variables is explaned by dimensions instead of variables. The dimensions combine the different variables.
+In order to conduct the linear discriminant analysis the dataset needs to be adjusted. I am dropping the HDI and GNI variables from the set as they are not interesting for our research question. Then I am scaling the standard set, using the function scale(), as the data contains only numerical values. The scaling needs to be done, because the linear discriminant analysis assumes that the variables are normally distributed and the variance of each variable is the same. In the scaling process the column means are substracted from the corresponding columns and divided by the standard deviatin. After scaling all the observations are between integral 10 and have a mean of 0.0. Now they can be related to each other and the disctances between the groups can be calculated. 
 ```{r scaling}
 #keep only the columns regarding health and education
 human2 <- read.csv("/Users/eva-mariaroth/Documents/GitHub/IODS-final/human2.csv", header = TRUE, sep= ",")
@@ -137,13 +144,14 @@ human_scaled <- scale(human2)
 # summaries of the scaled variables
 summary(human_scaled)
 ```
-```{r class}
-# class of the boston_scaled object
-class(human_scaled)
+Furthermore I am replacing the variable Life.Exp with the categorical variable Lifeexp. The variable was created by splitting the numerical variable into four categories (low, med_low, med_high, high), at 25%, 50% and 75% of the values. Table no. 2 shows how the observations are distributed in the four categories.
 
+Tab. 2: Number of observations in the four categories of variable Lifeexp
+```{r class}
+# class of the human_scaled object
+class(human_scaled)
 # change the object to data frame
 human_scaled <- as.data.frame(human_scaled)
-summary(human_scaled$Life.Exp)
 bins <- quantile(human_scaled$Life.Exp)
 bins
 #create a categorical variable crime
@@ -157,6 +165,7 @@ human_scaled <- dplyr::select(human_scaled, -Life.Exp)
 human_scaled <- data.frame(human_scaled, Lifeexp)
 str(human_scaled)
 ```
+I will also try to make predictions with the LDA model. To prove the viability of the model, I can split my data into as train (80% of observations) and a test set (20% of observations). The model will be trained with the train set and verified with the test set as a control. Therefore, I am splitting the dataset.
 ```{r train test}
 n<- nrow(human_scaled)
 #choose randomly 80% of the rows
@@ -171,7 +180,7 @@ correct_classes <- test$Lifeexp
 test <- dplyr::select(test, -Lifeexp)
 ```
 
-###linear discriminant analysis
+##3.2 Fitting the LDA model
 
 ```{r lda}
 lda.fit <- lda(Lifeexp ~ ., data  =train)
@@ -193,10 +202,11 @@ classes <- as.numeric(train$Lifeexp)
 
 # plot the lda results
 plot(lda.fit, dimen = 2, col = classes, pch = classes)
-lda.arrows(lda.fit, myscale = 2.5)
+lda.arrows(lda.fit, myscale = 2)
 ```
 
-#Predicting
+## 3.3 Making prediction with the LDA model
+With our trained LDA-model I can make predictions about new observations for the variable Lifeexp. I predict the classes with the LDA model for the observations of the test set I created earlier. In the cross tabulation we can see how the results of our predictions match with the Lifeexp categories from the test set. 21 observations were correctly predicted and 10 were false. That means our training error is about 32,35%. The model can be used to make predictions, but they are not very accurate. It would be recommendable to leave some of the variables out, like for example percentage of female reprasentatives in parliament as the there is no strong correlation with the variable Lifeexp.
 ```{r predict with lda}
 # predict classes with test data
 lda.pred <- predict(lda.fit, newdata = test)
