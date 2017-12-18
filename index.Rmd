@@ -1,5 +1,5 @@
 ---
-title: "IODS course final assignment"
+title: "IODS course - final assignment"
 author: 
 - name: "Eva-Maria Roth"  
   affiliation: "eva-maria.roth@helsinki.fi"
@@ -16,4 +16,9 @@ output:
     code_folding: hide
 
 ---
+***
 
+```{r child = "final.Rmd"}
+```
+
+***
