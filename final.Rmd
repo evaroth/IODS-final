@@ -2,7 +2,7 @@ In this assignment I am going to fit a multiple regression model on the dataset 
 Furthermore I will conduct linear discriminant analysis (LDA) with the data, train the LDA-model and try the model on a testing data set.
 
 #1. The dataset "human"
-The dataset originates from the [United Nationa Development Programme (UNDP)](http://hdr.undp.org/en/content/human-development-index-hdi). The UNDP aims to compare the development of countries and regions of the world, including not only growth alone, but many different variables. In this exercise we are using a subset, that I created from the original data. I selected certain variables concerning health and education as well as the Human Development Index (HDI) and the Gross National Income per capita (GNI). Missing values were removed from the dataset. The file of the data wrangling can be found here. The dataset contains 155 observations of 8 variables. The observations are made for 155 countries. The variables are:
+The dataset originates from the [United Nationa Development Programme (UNDP)](http://hdr.undp.org/en/content/human-development-index-hdi). The UNDP aims to compare the development of countries and regions of the world, including not only growth alone, but many different variables. In this exercise we are using a subset, that I created from the original data. I selected certain variables concerning health and education as well as the Human Development Index (HDI) and the Gross National Income per capita (GNI). Missing values were removed from the dataset. The file of the data wrangling can be found [here](https://github.com/evaroth/IODS-final/blob/master/datawrangling.R). The dataset contains 155 observations of 8 variables. The observations are made for 155 countries. The variables are:
 
 * **HDI:** Human Development index
 * **Edu2.FM:** Ratio of women with at least secondary education to men with at least seconday reducation
@@ -18,21 +18,35 @@ The dataset originates from the [United Nationa Development Programme (UNDP)](ht
 library(GGally)
 library(ggplot2)
 library(MASS)
+library(corrplot)
 #Now we read the data
 human <- read.csv("/Users/eva-mariaroth/Documents/GitHub/IODS-final/human_.csv", header = TRUE, sep= ",")
 #Exploring the data, its structur and dimensions
 str(human)
 ```
-I want to take a closer look at the variables and their relationships to each other. For this I can pair the variables see if there are correlations.The correlation matrix shows us the distribution of the data for each variable. The variables are paired and the results are shown graphically in scatter plots and with the Correlation Coefficient. The highest correlation we can find between Life Expectancy and HDI with a correlation coefficient of 0.905.
+I want to take a closer look at the variables and their relationships to each other. In order to do this I can pair the variables and see if there are correlations.The plot matrix shows us the distribution of the data for each variable. The variables are paired and the results are shown graphically in scatter plots and with the Correlation Coefficient. We can find the highest correlation between Life Expectancy and HDI with a correlation coefficient of 0.905.
 ```{r human pairs}
-p <- ggpairs(human, mapping = aes(), lower = list(combo = wrap("facethist", bins = 20)))
+p <- ggpairs(human, mapping = aes(col = "green4", alpha = 0.7), lower = list(combo = wrap("facethist", bins = 18)), title = "Fig. 1: Graphical overview of the dataset human")
 p
+```
+
+Another way to get a quick overview about the correlation of the variables is the correlation plot.In the correlation plot the colour indicates what kind of correlation we have:    
+red - negative correlation  
+blue - positive correlation  
+The size of the cirlce and the intensity of the colour indicate the correlation coefficient.  
+strong colours - corrolation coefficient is high    
+light colours  - corrolation coefficient is low 
+We can see that the the variables are strongly correlating with each other, except for the amount of female representatives in the parliament. It does not seem to have a significant influence on HDI, GNI or Life Expectancy. Obviously other factors play a bigger role here. There are strong positive correlations between HDI, Life Expectancy and Mean Education. Strong negative correlations can be found between HDI and Maternal mortality ratio as well as life expectancy and maternal mortality ratio.
+
+```{r corrplot}
+cor_matrix<-cor(human)
+corrplot(cor_matrix, method="circle", type = "upper", cl.pos = "b", tl.pos = "d", tl.cex = 0.6, title = "Fig.2: Correlation plot for the paired dataset of human")
 ```
 
 # 2. Simple regression
 ```{r simple regr scatterplot}
 #creating a scatter plot of Life.Exp versus Mean.Edu with a linear regression line
-qplot(Life.Exp, Mean.Edu, data = human) + geom_smooth(method = "lm")
+qplot(Life.Exp, Mean.Edu, data = human, main = "Fig.3: Linear regression for life expectancy and mean years of education") + geom_smooth(method = "lm")
 ```
 
 
