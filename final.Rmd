@@ -2,16 +2,20 @@ In this assignment I am going to fit a multiple regression model on the dataset 
 Furthermore I will conduct linear discriminant analysis (LDA) with the data, train the LDA-model and try the model on a testing data set.
 
 #1. The dataset "human"
-The dataset originates from the [United Nationa Development Programme (UNDP)](http://hdr.undp.org/en/content/human-development-index-hdi). The UNDP aims to compare the development of countries and regions of the world, including not only growth alone, but many different variables. In this exercise we are using a subset, that I created from the original data. I selected certain variables concerning health and education as well as the Human Development Index (HDI) and the Gross National Income per capita (GNI). Missing values were removed from the dataset. The file of the data wrangling can be found [here](https://github.com/evaroth/IODS-final/blob/master/datawrangling.R). The dataset contains 155 observations of 8 variables. The observations are made for 155 countries. The variables are:
+The dataset originates from the [United Nationa Development Programme (UNDP)](http://hdr.undp.org/en/content/human-development-index-hdi). The UNDP aims to compare the development of countries and regions of the world, including not only growth alone, but many different variables. In this exercise we are using a subset, that I created from the original data. I selected certain variables concerning health and education as well as the Human Development Index (HDI) and the Gross National Income per capita (GNI). Missing values were removed from the dataset. The file of the data wrangling can be found [here](https://github.com/evaroth/IODS-final/blob/master/datawrangling.R). 
 
-* **HDI:** Human Development index
-* **Edu2.FM:** Ratio of women with at least secondary education to men with at least seconday reducation
-* **Life.Exp:** Life expectancy at birth
+The dataset contains 155 observations of 8 variables. The observations are made for 155 countries. Out of the 8 variables GNI and Mat.Mor are integer variables, the others are numerical. In the following list you may see the names of the variables and what kind of information they have recorded.
+
+* **HDI:** human development index
+* **Edu2.FM:** ratio of women with at least secondary education to men with at least seconday reducation
+* **Life.Exp:** life expectancy at birth
 * **Mean.Edu:** mean years of education
-* **GNI:** Gross National Income per capita
-* **Mat.Mor:** Maternal mortality ratio
-* **Ado.Birth:** Adolescent birth rate
-* **Parli.F:** Percentage of female representatives in parliament
+* **GNI:** gross national income per capita
+* **Mat.Mor:** maternal mortality ratio
+* **Ado.Birth:** adolescent birth rate
+* **Parli.F:** percentage of female representatives in parliament
+
+I hypothesize, that variables concerning education (Edu.FM, Mean.Edu, Parli.F) have a strong influence on variables concerning health (Life.Exp, Mat.Mor, Parli.F). A better education equally for men and women, has eventually a better influence on life expectancy and health condition of a people.
 
 ```{r data human}
 #At first I am accessing all the packages that I will be using during this exercise
@@ -40,15 +44,22 @@ We can see that the the variables are strongly correlating with each other, exce
 
 ```{r corrplot}
 cor_matrix<-cor(human)
-corrplot(cor_matrix, method="circle", type = "upper", cl.pos = "b", tl.pos = "d", tl.cex = 0.6, title = "Fig.2: Correlation plot for the paired dataset of human")
+corrplot(cor_matrix, method="circle", type = "lower", cl.pos = "b", tl.pos = "d", tl.cex = 0.6, title = "
+         Fig.2: Correlation plot for the paired dataset of human")
 ```
 
-# 2. Simple regression
+# 2. Regression analysis
+##2.1 Simple regression
+In order to find out more about the impact of education on health we will perform a regression analysis for the varibales Mean.Edu and Life.Exp, the two variables, very simplified, standing for education and health. In Figure 3 we can see the observations of theses variables plotted against each other and a linear regression line fitted to them. 
 ```{r simple regr scatterplot}
 #creating a scatter plot of Life.Exp versus Mean.Edu with a linear regression line
-qplot(Life.Exp, Mean.Edu, data = human, main = "Fig.3: Linear regression for life expectancy and mean years of education") + geom_smooth(method = "lm")
+qplot(Life.Exp, Mean.Edu, data = human, main = "Fig.3: Linear regression for life expectancy and mean years of education", colour = "red") + geom_smooth(method = "lm")
 ```
 
+Now we want to write a simple regression model and see what kind of information it gives us.Life.Exp beeing the dependant variable y and Mean.Edu the explanatory variable x. Alpha indicates the point where the regression line intercepts the y-axis and beta to the slope of the regression line.Epsilon is an unobservable random variable, that is assumed to add noise to the observations and describes the errors of the model.
+
+![](/Users/eva-mariaroth/Desktop/Bildschirmfoto 2017-12-18 um 11.59.50.png)
+The summary of the simple regression model at first shows us the formula applied, indicating the dependant variable and the explanatory variable. Then it gives us a summary of the residuals of the model. The residuals describe the prediction errors, i.e. the difference between the predicitions and the actual values. The Estimate of the Intercept gives us the alpha parameter. In this case it would be 55.46. The estimate for the variable Mean.Edu gives us the beta parameter: 1,95. The P value of the model, based on the t-test.
 
 ```{r simple regr}
 #fitting a linear model where Life.Exp is the target, whereas mean. edu is the explanatory variable
@@ -56,7 +67,7 @@ my_model <- lm(Life.Exp ~ Mean.Edu, data = human)
 summary(my_model)
 ```
 
-###2.1 Making predictions using the model
+###2.2 Making predictions using the model
 ```{r predict}
 #predicting
 m <- lm(Life.Exp ~ Mean.Edu, data = human)
@@ -76,15 +87,15 @@ predict(m, newdata = new_data)
 
 
 
-# 3 Multiple regression model
-
+# 2.3 Multiple regression model
+For taken more variables into account, we can write a multiple regression model.
 
 ```{r multipl regr}
 #fitting a multiple regression model with several explanatory variables
 my_model2 <- lm(Life.Exp ~ Mean.Edu + Edu2.FM + Parli.F, data =human)
 summary(my_model2)
 ```
-
+# 2.4 Validity check for both models
 ```{r validity}
 #exploring validity of the model by drawing diagnostic plots
 par(mfrow = c(2,2))
