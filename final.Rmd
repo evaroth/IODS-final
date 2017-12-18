@@ -15,7 +15,7 @@ The dataset contains 155 observations of 8 variables. The observations are made 
 * **Ado.Birth:** adolescent birth rate
 * **Parli.F:** percentage of female representatives in parliament
 
-I hypothesize, that variables concerning education (Edu.FM, Mean.Edu, Parli.F) have a strong influence on variables concerning health (Life.Exp, Mat.Mor, Parli.F). A better education equally for men and women, has eventually a better influence on life expectancy and health condition of a people.
+I hypothesize, that the variables concerning education (Edu.FM, Mean.Edu, Parli.F) have a strong influence on the variables concerning health (Life.Exp, Mat.Mor, Parli.F). A better education equally for men and women, has eventually a better influence on life expectancy and health condition of a people.
 
 ```{r data human}
 #At first I am accessing all the packages that I will be using during this exercise
@@ -56,10 +56,11 @@ In order to find out more about the impact of education on health we will perfor
 qplot(Life.Exp, Mean.Edu, data = human, main = "Fig.3: Linear regression for life expectancy and mean years of education", colour = "red") + geom_smooth(method = "lm")
 ```
 
-Now we want to write a simple regression model and see what kind of information it gives us.Life.Exp beeing the dependant variable y and Mean.Edu the explanatory variable x. Alpha indicates the point where the regression line intercepts the y-axis and beta to the slope of the regression line.Epsilon is an unobservable random variable, that is assumed to add noise to the observations and describes the errors of the model.
+Now we want to write a simple regression model and see what kind of information it gives us. Life.Exp beeing the dependant variable y and Mean.Edu the explanatory variable x. Alpha indicates the point where the regression line intercepts the y-axis and beta to the slope of the regression line.Epsilon is an unobservable random variable, that is assumed to add noise to the observations and describes the errors of the model.
 
 ![](/Users/eva-mariaroth/Desktop/Bildschirmfoto 2017-12-18 um 11.59.50.png)
-The summary of the simple regression model at first shows us the formula applied, indicating the dependant variable and the explanatory variable. Then it gives us a summary of the residuals of the model. The residuals describe the prediction errors, i.e. the difference between the predicitions and the actual values. The Estimate of the Intercept gives us the alpha parameter. In this case it would be 55.46. The estimate for the variable Mean.Edu gives us the beta parameter: 1,95. The P value of the model, based on the t-test.
+
+The summary of the simple regression model at first shows us the formula applied, indicating the dependant variable and the explanatory variable. Then it gives us a summary of the residuals of the model. The residuals describe the prediction errors, i.e. the difference between the predicitions and the actual values. The estimate of the intercept describes the alpha parameter. In this case it would be 55.46. The estimate for the variable Mean.Edu gives us the beta parameter: 1,95. The P value of the model is very small, that means that the correlation between the variables is highly significant.
 
 ```{r simple regr}
 #fitting a linear model where Life.Exp is the target, whereas mean. edu is the explanatory variable
@@ -68,15 +69,24 @@ summary(my_model)
 ```
 
 ###2.2 Making predictions using the model
+Using the model, that I wrote, we can make predictions, about the life expectancy that we would find in countries, if the mean years of education would change. For this purpose I have added examplarily new values for the mean years of education for six countries. In table 1 we can see the predicted life expectancy that these countries would have, if the mean years of education would correspond to the newly entered values.
+
+Country  | Mean.Edu | Life.Exp    |Mean.Edu new | Life.exp predicted
+-------- | -------- | ----------- | ----------- | ------------
+Niger    | 1.5      | 61.4        | 12.1        | 79.1
+Chad     | 1.9      | 51.6        | 11.5        | 77.9
+Mali     | 2.0      | 58.0        | 10.3        | 75.6
+Nepal    | 3.3      | 69.6        | 10.5        | 75.9
+Haiti    | 4.9      | 62.8        | 11.7        | 78.3
+Yemen    | 2.6      | 63.8        | 10.0        | 74.9
+Tab.1: 
+
 ```{r predict}
 #predicting
 m <- lm(Life.Exp ~ Mean.Edu, data = human)
 
-# print out a summary of the model
-summary(m)
-
 # New observations
-new_mean.edu <- c("Niger" = 12.1, "Chad"= 11.5, "Mali" = 10.3, "Nepal" = 10.5, "Haiti" =11,7, "Yemen" = 10)
+new_mean.edu <- c("Niger" = 12.1, "Chad"= 11.5, "Mali" = 10.3, "Nepal" = 10.5, "Haiti" =11.7, "Yemen" = 10)
 new_data <- data.frame(Mean.Edu = new_mean.edu)
 
 # Print out the new data
