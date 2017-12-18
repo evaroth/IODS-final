@@ -71,16 +71,6 @@ summary(my_model)
 ###2.2 Making predictions using the model
 Using the model, that I wrote, we can make predictions, about the life expectancy that we would find in countries, if the mean years of education would change. For this purpose I have added examplarily new values for the mean years of education for six countries. In table 1 we can see the predicted life expectancy that these countries would have, if the mean years of education would correspond to the newly entered values.
 
-Country  | Mean.Edu | Life.Exp    |Mean.Edu new | Life.exp predicted
--------- | -------- | ----------- | ----------- | ------------
-Niger    | 1.5      | 61.4        | 12.1        | 79.1
-Chad     | 1.9      | 51.6        | 11.5        | 77.9
-Mali     | 2.0      | 58.0        | 10.3        | 75.6
-Nepal    | 3.3      | 69.6        | 10.5        | 75.9
-Haiti    | 4.9      | 62.8        | 11.7        | 78.3
-Yemen    | 2.6      | 63.8        | 10.0        | 74.9
-Tab.1: 
-
 ```{r predict}
 #predicting
 m <- lm(Life.Exp ~ Mean.Edu, data = human)
@@ -89,33 +79,56 @@ m <- lm(Life.Exp ~ Mean.Edu, data = human)
 new_mean.edu <- c("Niger" = 12.1, "Chad"= 11.5, "Mali" = 10.3, "Nepal" = 10.5, "Haiti" =11.7, "Yemen" = 10)
 new_data <- data.frame(Mean.Edu = new_mean.edu)
 
-# Print out the new data
-new_data
+# Print out the predicted values
 predict(m, newdata = new_data)
 ```
 
+Tab.1:Mean years of education and life expectancy, and the predicted life expectancy if the number of mean years of education would be substantially higher, calculated with the model for six countries. 
 
+
+Country     | Mean.Edu  | Life.Exp    |Mean.Edu new | Life.exp predicted
+----------- | --------  | ----------- | ----------- | ------------
+Niger       | 1.5       | 61.4        | 12.1        | 79.1
+Chad        | 1.9       | 51.6        | 11.5        | 77.9
+Mali        | 2.0       | 58.0        | 10.3        | 75.6
+Nepal       | 3.3       | 69.6        | 10.5        | 75.9
+Haiti       | 4.9       | 62.8        | 11.7        | 78.3
+Yemen       | 2.6       | 63.8        | 10.0        | 74.9
 
 
 # 2.3 Multiple regression model
-For taken more variables into account, we can write a multiple regression model.
+For taken more variables into account, we can write a multiple regression model with life expectany beeing the dependant variable and several explanatory variables x1, x2, x3 (Mean.Edu, Edu2.FM, Parli.F). 
+![](/Users/eva-mariaroth/Desktop/Bildschirmfoto 2017-12-18 um 12.20.24.png)
 
 ```{r multipl regr}
 #fitting a multiple regression model with several explanatory variables
 my_model2 <- lm(Life.Exp ~ Mean.Edu + Edu2.FM + Parli.F, data =human)
 summary(my_model2)
 ```
+In the summary of the model we can see, that on the mean years of education have a highly significant correlation with life expectancy. There is no significant correlation between female members in parliament and life expectance.
+
 # 2.4 Validity check for both models
+Linear regression models assume that the errors are normally distributed, not correlated and have constant variance, i.e. the size of the error does not depend on the explanatory variables. By analysing the residuals of the model we can explore the validity of the model assumptions.
+
+Below we can see the three diagnostic plots "Residuals versus Fitted", "Normal QQ" and "Residuals vs Leverage" for the simple linear regression . 
+The scatter plot of residuals versus fitted proves or disproves the assumption of the constant variance assumption. There is a small tendency of the spread of the residuals to decrease with increasing fitted values. However, the tendancy is not clear. Therefore, i conclude, that the constant variance assumtpion applies.
+The QQ plot shows the distribution of the errors. The better the values fit to the dotted line, the more are they normally distributed. We can see that the values fit reasonably well, which means that they are evenly distributed. However, the model seems to be less suitable in both ends of the values. Then there is a small deviation between the line and the errors. 
+The leverage measures how much impact a single observation has on the model. In the Residuals versus Leverage plot we can see that no single observation has a 
+There are no single outliers and leverage for all the observations is lower then 0.4.
+```{r diagnostic2}
+par(mfrow = c(2,2))
+plot(my_model, which = c(1,2,5))
+```
+
+
+The validation plots for the multiple regression model are very similar to the linear regression. The leverage is even smaller with less then two, though there are two outliers. Both models can be validated. However, this is just an example for the methods and there are a lot of factors that were not considered in this exercise and do also have an impact on life expectancy.
 ```{r validity}
 #exploring validity of the model by drawing diagnostic plots
 par(mfrow = c(2,2))
 plot(my_model2, which = c(1,2,5))
 ```
 
-```{r diagnostic2}
-par(mfrow = c(2,2))
-plot(my_model, which = c(1,2,5))
-```
+
 # 4 Performing Linear Discriminant analysis
 ```{r scaling}
 #keep only the columns regarding health and education
