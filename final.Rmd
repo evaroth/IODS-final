@@ -33,19 +33,20 @@ str(human)
 summary(human)
 ```
 
-I want to take a closer look at the variables and their relationships to each other. In order to do this I can pair the variables and see if there are correlations.The plot matrix shows us the distribution of the data for each variable. The variables are paired and the results are shown graphically in scatter plots and with the Correlation Coefficient. We can find the highest correlation between Life Expectancy and HDI with a correlation coefficient of 0.905.
+I want to take a closer look at the variables and their relationships to each other. In order to do this I can pair the variables and see if there are correlations.The plot matrix in figure 1 shows us the distribution of the data for each variable. The variables are paired and the results are shown graphically in scatter plots and with the Correlation Coefficient. We can find the highest correlation between Life Expectancy and HDI with a correlation coefficient of 0.905.
 ```{r human pairs}
 p <- ggpairs(human, mapping = aes(col = "green4", alpha = 0.9), lower = list(combo = wrap("facethist", bins = 18)), title = "Fig. 1: Graphical overview of the dataset human")
 p
 ```
 
-Another way to get a quick overview about the correlation of the variables is the correlation plot.In the correlation plot the colour indicates what kind of correlation we have:    
+Another way to get a quick overview about the correlation of the variables is the correlation plot. In the correlation plot the colour indicates what kind of correlation we have:    
 red - negative correlation  
 blue - positive correlation  
 The size of the cirlce and the intensity of the colour indicate the correlation coefficient.  
 strong colours - corrolation coefficient is high    
-light colours  - corrolation coefficient is low 
-We can see that the the variables are strongly correlating with each other, except for the amount of female representatives in the parliament. It does not seem to have a significant influence on HDI, GNI or Life Expectancy. Obviously other factors play a bigger role here. There are strong positive correlations between HDI, Life Expectancy and Mean Education. Strong negative correlations can be found between HDI and Maternal mortality ratio as well as life expectancy and maternal mortality ratio.
+light colours  - corrolation coefficient is low
+
+In figure 2 can see that the the variables are strongly correlating with each other, except for the amount of female representatives in the parliament. It does not seem to have a significant influence on HDI, GNI or Life Expectancy. Obviously other factors play a bigger role here. There are strong positive correlations between HDI, Life Expectancy and Mean Education. Strong negative correlations can be found between HDI and Maternal mortality ratio as well as life expectancy and maternal mortality ratio.
 
 ```{r corrplot}
 cor_matrix<-cor(human)
@@ -54,8 +55,8 @@ corrplot(cor_matrix, method="circle", type = "lower", cl.pos = "b", tl.pos = "d"
 ```
 
 # 2. Regression analysis
-##2.1 Simple regression
-In order to find out more about the impact of education on health we will perform a regression analysis for the varibales Mean.Edu and Life.Exp, the two variables, very simplified, standing for education and health. In Figure 3 we can see the observations of theses variables plotted against each other and a linear regression line fitted to them. 
+##2.1 Simple linear regression model
+In order to find out more about the impact of education on health we will perform a regression analysis for the varibales Mean.Edu and Life.Exp, the two variables, very simplified, standing for education and health. In figure 3 we can see the observations of theses variables plotted against each other and a linear regression line fitted to them. 
 ```{r simple regr scatterplot}
 #creating a scatter plot of Life.Exp versus Mean.Edu with a linear regression line
 qplot(Life.Exp, Mean.Edu, data = human, main = "Fig.3: Linear regression for life expectancy and mean years of education", colour = "red") + geom_smooth(method = "lm")
@@ -64,7 +65,7 @@ qplot(Life.Exp, Mean.Edu, data = human, main = "Fig.3: Linear regression for lif
 Now we want to write a simple regression model and see what kind of information it gives us. The simple regression has the following formula:
 ![](/Users/eva-mariaroth/Desktop/Bildschirmfoto 2017-12-18 um 11.59.50.png)
 
-Life.Exp is the dependant variable y and Mean.Edu the explanatory variable x. Alpha indicates the point where the regression line intercepts the y-axis and beta to the slope of the regression line.Epsilon is an unobservable random variable, that is assumed to add noise to the observations and describes the errors of the model.
+Life.Exp is the dependant variable y and Mean.Edu the explanatory variable x. Alpha indicates the point where the regression line intercepts the y-axis and beta to the slope of the regression line. Epsilon is an unobservable random variable, that is assumed to add noise to the observations and describes the errors of the model.
 The summary of the simple regression model at first shows us the formula applied, indicating the dependant variable and the explanatory variable. Then it gives us a summary of the residuals of the model. The residuals describe the prediction errors, i.e. the difference between the predicitions and the actual values. The estimate of the intercept describes the alpha parameter. In this case it would be 55.46. The estimate for the variable Mean.Edu gives us the beta parameter: 1,95. The P value of the model is very small, that means that the correlation between the variables is highly significant.
 
 ```{r simple regr}
@@ -73,9 +74,10 @@ my_model <- lm(Life.Exp ~ Mean.Edu, data = human)
 summary(my_model)
 ```
 
-##2.2 Making predictions using the model
-Using the model, that I wrote, we can make predictions, about the life expectancy that we would find in countries, if the mean years of education would change. For this purpose I have added examplarily new values for the mean years of education for six countries. In table 1 we can see the predicted life expectancy that these countries would have, if the mean years of education would correspond to the newly entered values.
+##2.2 Making predictions using the simple regression model
+Using the model, that I wrote, we can make predictions, about the life expectancy that we would find in countries, if the mean years of education would change. For this purpose I have added examplarily new values for the mean years of education for six countries. In table 2 we can see the predicted life expectancy that these countries would have, if the mean years of education would correspond to the newly entered values.
 
+Tab. 1: Predicted for the six countries after adding new data
 ```{r predict}
 #predicting
 m <- lm(Life.Exp ~ Mean.Edu, data = human)
@@ -88,8 +90,8 @@ new_data <- data.frame(Mean.Edu = new_mean.edu)
 predict(m, newdata = new_data)
 ```
 
-Tab.1:Mean years of education and life expectancy, and the predicted life expectancy if the number of mean years of education would be substantially higher, calculated with the model for six countries. 
 
+Tab.2:Mean years of education and life expectancy, and the predicted life expectancy if the number of mean years of education would be substantially higher, calculated with the model for six countries. 
 
 Country     | Mean.Edu  | Life.Exp    |Mean.Edu new | Life.exp predicted
 ----------- | --------  | ----------- | ----------- | ------------
@@ -101,7 +103,7 @@ Haiti       | 4.9       | 62.8        | 11.7        | 78.3
 Yemen       | 2.6       | 63.8        | 10.0        | 74.9
 
 
-## 2.3 Multiple regression model
+## 2.3 Multiple linear regression model
 For taken more variables into account, we can write a multiple regression model with life expectany beeing the dependant variable and several explanatory variables x1, x2, x3 (Mean.Edu, Edu2.FM, Parli.F). The formula would be:
 ![](/Users/eva-mariaroth/Desktop/Bildschirmfoto 2017-12-18 um 12.20.24.png)
 
@@ -116,9 +118,12 @@ In the summary of the model we can see, that on the mean years of education have
 Linear regression models assume that the errors are normally distributed, not correlated and have constant variance, i.e. the size of the error does not depend on the explanatory variables. By analysing the residuals of the model we can explore the validity of the model assumptions.
 
 Below we can see the three diagnostic plots "Residuals versus Fitted", "Normal QQ" and "Residuals vs Leverage" for the simple linear regression . 
+
 The scatter plot of residuals versus fitted proves or disproves the assumption of the constant variance assumption. There is a small tendency of the spread of the residuals to decrease with increasing fitted values. However, the tendancy is not clear. Therefore, i conclude, that the constant variance assumtpion applies.
+
 The QQ plot shows the distribution of the errors. The better the values fit to the dotted line, the more are they normally distributed. We can see that the values fit reasonably well, which means that they are evenly distributed. However, the model seems to be less suitable in both ends of the values. Then there is a small deviation between the line and the errors. 
-The leverage measures how much impact a single observation has on the model. In the Residuals versus Leverage plot we can see that no single observation has a 
+
+The leverage measures how much impact a single observation has on the model. In the Residuals versus Leverage plot we can see that no single observation has a high impact on the model.
 There are no single outliers and leverage for all the observations is lower then 0.4.
 ```{r diagnostic2}
 par(mfrow = c(2,2))
@@ -127,7 +132,7 @@ plot(my_model, which = c(1,2,5), main = "Diagnostic plots for the simple regress
 ```
 
 
-The validation plots for the multiple regression model are very similar to the linear regression. The leverage is even smaller with less then two, though there are two outliers. Both models can be validated. However, this is just an example for the methods and there are a lot of factors that were not considered in this exercise and do also have an impact on life expectancy.
+The validation plots for the multiple regression model are very similar to the linear regression. The leverage is even smaller with less then two, though there are two outliers. Both models can be validated. However, this is just an example for the methods and there are a lot of variables that were not considered in this exercise and do also have an impact on life expectancy.
 ```{r validity}
 #exploring validity of the model by drawing diagnostic plots
 par(mfrow = c(2,2))
@@ -158,7 +163,7 @@ human_scaled <- as.data.frame(human_scaled)
 bins <- quantile(human_scaled$Life.Exp)
 bins
 ```
-Tab. 2: Number of observations in the four categories of variable Lifeexp
+Tab. 3: Number of observations in the four categories of variable Lifeexp
 ```{r categorical}
 #create a categorical variable Lifeexp
 Lifeexp <- cut(human_scaled$Life.Exp, breaks = bins, include.lowest = TRUE, labels = c("low", "med_low", "med_high", "high"))
@@ -185,7 +190,7 @@ correct_classes <- test$Lifeexp
 #remove the Lifeexp variable from the test data
 test <- dplyr::select(test, -Lifeexp)
 ```
-Tab.3 & 4: Number of observations and variables for the train and the test set.
+Tab.4 & 5: Number of observations and variables for the train and the test set.
 ```{r dim test train}
 # checking dimensions and observations of the two sets
 dim(train)
@@ -195,7 +200,7 @@ The train set has 124 observations of 6 variables and the test set 31 observatio
 
 ##3.2 Fitting the LDA model
 
-Now we are fitting a linear discriminant analysis (LDA) to the training set. Lifeexp is the target variable and all the other variables are predictors. Furtehr down we can see the output of the LDA model. The prior probabilities give us the percentage of observations for each category. The group means show the mean value for every explanatory variable for each category. Further down we can see the coefficients for the produced linear discriminants. The proportion of variance shows how much of the variance between the groups is hold by the linear discriminants. LD1 holds 90% of the variance and LD2 0.09%.
+Now we are fitting a linear discriminant analysis (LDA) to the training set. Lifeexp is the target variable and all the other variables are predictors. Further down we can see the output of the LDA model. The prior probabilities give us the percentage of observations for each category. The group means show the mean value for every explanatory variable for each category. Further down we can see the coefficients for the produced linear discriminants. The proportion of variance shows how much of the variance between the groups is hold by the linear discriminants. LD1 holds 90% of the variance and LD2 0.09%.
 ```{r lda}
 lda.fit <- lda(Lifeexp ~ ., data  = train)
 #printing the lda.fit object
@@ -226,7 +231,7 @@ From the arrows in the biplot we can conclude that the maternal mortality ratio 
 ## 3.3 Making predictions with the LDA model
 With our trained LDA-model I can make predictions about new observations for the variable Lifeexp. I am predicting the classes with the LDA model for the observations of the test set I created earlier. In the cross tabulation we can see how the results of our predictions match with the Lifeexp categories from the test set. 21 observations were correctly predicted and 10 were false. That means our training error is about 32,35%. The model can be used to make predictions, but they are not very accurate. It would be recommendable to leave some of the variables out, like for example percentage of female reprasentatives in parliament as the there is no strong correlation with the variable Lifeexp.
 
-Tab. 5: Predicted observations and actual observations for the variable lifeexpectancy of the test set crosstabulated
+Tab. 6: Predicted observations and actual observations for the variable lifeexpectancy of the test set crosstabulated
 ```{r predict with lda}
 # predict classes with test data
 lda.pred <- predict(lda.fit, newdata = test)
@@ -235,7 +240,7 @@ lda.pred <- predict(lda.fit, newdata = test)
 table(correct = correct_classes, predicted = lda.pred$class)
 ```
 
-#4 Conclusion
+#4. Conclusion
 From the statistical methods that I applied exemplarily, I can conclude that
 
 * Education has a significant positive correlation with health, especially life expectancy.
@@ -243,7 +248,7 @@ From the statistical methods that I applied exemplarily, I can conclude that
 * If I wanted to establish a model to make predictions about Life expectancy, I should include more variables to have a more precise output.
 
 
-#5 Sources
+#5. Sources
 All the information used can be found on the [MOOC](https://mooc.helsinki.fi/course/view.php?id=92) platform of the IODS-course.
 
 
